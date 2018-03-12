@@ -34,15 +34,30 @@ class MainApplication(Frame):
                                    bg='deep sky blue',
                                    relief="raised")
         self.MENU = Menu(self.MB_TOLLS, tearoff=False)
+        self.FRONTAL_MENU = Menu(self.MENU, tearoff=False)
+        self.RAMP_MENU = Menu(self.MENU, tearoff=False)
         self.MB_TOLLS.configure(menu=self.MENU)
         self.MB_TOLLS.grid(row=0, column=0, pady=10, padx=10)
-        self.tolls = {}
-        for choice in self.tolls_data.keys():
-            self.tolls[choice] = IntVar(value=0)
-            self.MENU.add_checkbutton(label=choice,
-                                      variable=self.tolls[choice],
-                                      onvalue=1, offvalue=0,
-                                      command=self.tollCost)
+        self.frontal_stations = {}
+        for choice in self.tolls_data["Frontal"].keys():
+            self.frontal_stations[choice] = IntVar(value=0)
+            self.FRONTAL_MENU.add_checkbutton(
+                label=choice,
+                variable=self.frontal_stations[choice],
+                onvalue=1, offvalue=0,
+                command=self.tollCost)
+        self.MENU.add_cascade(label="Frontal Stations",
+                              menu=self.FRONTAL_MENU)
+
+        self.ramp_stations = {}
+        for choice in self.tolls_data["Ramp"].keys():
+            self.ramp_stations[choice] = IntVar(value=0)
+            self.RAMP_MENU.add_checkbutton(label=choice,
+                                           variable=self.ramp_stations[choice],
+                                           onvalue=1, offvalue=0,
+                                           command=self.tollCost)
+        self.MENU.add_cascade(label="Ramp Stations",
+                              menu=self.RAMP_MENU)
 
         self.MB_VEHICLE = Menubutton(self,
                                      text="Select Vehicle Type",
@@ -108,9 +123,14 @@ class MainApplication(Frame):
         self.total = 0
         self.MB_TOLLS.configure(text='Select Tolls')
         tolls = ''
-        for name, var in self.tolls.items():
+        for name, var in self.frontal_stations.items():
             if var.get() != 0:
-                cost = float(self.tolls_data[name][self.vehicle])
+                cost = float(self.tolls_data["Frontal"][name][self.vehicle])
+                self.total = self.total + cost
+                tolls = tolls + name + ', '
+        for name, var in self.ramp_stations.items():
+            if var.get() != 0:
+                cost = float(self.tolls_data["Ramp"][name][self.vehicle])
                 self.total = self.total + cost
                 tolls = tolls + name + ', '
         if tolls != '':
