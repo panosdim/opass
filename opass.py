@@ -8,9 +8,10 @@
 # Version: 1.0
 # ---------------------------------------------------------------------------
 
-from tkinter import *
-import os
 import json
+import os
+from tkinter import (Frame, Menubutton, Menu, Button, Text, IntVar, Label,
+                     Entry, Tk, PhotoImage, END, DISABLED, NORMAL)
 
 
 class MainApplication(Frame):
