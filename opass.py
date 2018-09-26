@@ -5,7 +5,7 @@
 #
 # Copyright 2018 Panagiotis Dimopoulos (panosdim@gmail.com)
 #
-# Version: 1.0
+# Version: 2.0
 # ---------------------------------------------------------------------------
 """
 Olympia Odos Application
@@ -21,6 +21,7 @@ from tkinter import (Frame, Text, IntVar, Tk, PhotoImage,
                      END, DISABLED, NORMAL)
 from tkinter import ttk
 from ttkthemes import ThemedStyle
+import workdays
 
 
 def validate(action, value_if_allowed, text):
@@ -68,6 +69,7 @@ class MainApplication(Frame):
         self.grid(pady=10, padx=10)
         self.parent.title("Olympia Odos Pass")
 
+        # Frontal Tolls
         self.lbl_frnt_tolls = ttk.Label(self,
                                         text="Select Frontal Tolls")
 
@@ -92,6 +94,7 @@ class MainApplication(Frame):
                 row = row + 1
                 cln = 0
 
+        # Ramp Tolls
         self.lbl_ramp_tolls = ttk.Label(self,
                                         text="Select Ramp Tolls")
 
@@ -115,11 +118,12 @@ class MainApplication(Frame):
                 row = row + 1
                 cln = 0
 
+        # Vehicle Type
+        self.lbl_vehicle_type = ttk.Label(
+            self, text="Select Vehicle Type")
+        self.lbl_vehicle_type.grid(row=4, column=0, stick='W')
         frame2 = Frame(self)
         frame2.grid(row=5, column=0, sticky='WE', pady=5)
-        self.lbl_vehicle_type = ttk.Label(
-            frame2, text="Select Vehicle Type")
-        self.lbl_vehicle_type.grid(row=0, column=0, stick='W')
         self.vehicle_types = ['Motorcycle',
                               'Vehicles',
                               'Vehicles with 2-3 axes',
@@ -132,16 +136,18 @@ class MainApplication(Frame):
                             variable=self.selected_vehicle_type,
                             value=idx,
                             command=self.vehicle_type).grid(
-                                row=1,
+                                row=0,
                                 column=idx,
                                 stick='W')
 
+        # Monthly passes
         frame3 = Frame(self)
-        frame3.grid(row=6, column=0, pady=5)
+        frame3.grid(row=6, column=0, sticky='WE', pady=5)
         self.lbl_monthly_passes = ttk.Label(
-            frame3, text="Monthly number of passes")
+            frame3,
+            text="Set monthly number of passes manually")
         self.lbl_monthly_passes.grid(
-            row=0, column=0, pady=5, padx=5, stick='W')
+            row=0, column=0, sticky='W')
 
         vcmd = (parent.register(validate), '%d', '%P', '%S')
         self.ent_monthly_passes = ttk.Entry(
@@ -149,19 +155,60 @@ class MainApplication(Frame):
             validate='key',
             validatecommand=vcmd)
         self.ent_monthly_passes.grid(
-            row=0, column=1, pady=5, padx=5, stick='W')
+            row=0, column=1, padx=5, sticky='W')
 
+        self.lbl_monthly_passes_sel = ttk.Label(
+            frame3,
+            text="or select a month for working days")
+        self.lbl_monthly_passes_sel.grid(
+            row=1, column=0, sticky='W')
+
+        frame4 = Frame(self)
+        frame4.grid(row=7, column=0, sticky='WE', pady=5)
+        self.months = ['January',
+                       'February',
+                       'March',
+                       'April',
+                       'May',
+                       'June',
+                       'July',
+                       'August',
+                       'September',
+                       'Octomber',
+                       'November',
+                       'December']
+
+        cln = 0
+        row = 0
+        self.selected_month = IntVar(value=0)
+        for idx, val in enumerate(self.months):
+            ttk.Radiobutton(frame4,
+                            text=val,
+                            variable=self.selected_month,
+                            value=idx,
+                            command=self.month_selected).grid(
+                                row=row,
+                                column=cln,
+                                stick='W')
+            cln = cln + 1
+            if cln == 6:
+                row = row + 1
+                cln = 0
+
+        # Calculate button
         self.btn_calc = ttk.Button(self, text="Caclulate",
                                    command=self.calculate)
-        self.btn_calc.grid(row=7, column=0, columnspan=2, pady=10)
+        self.btn_calc.grid(row=8, column=0, columnspan=2, pady=10)
 
+        # Result pane
         self.txt_result = Text(self, width=60, height=10, state=DISABLED)
-        self.txt_result.grid(row=8, column=0, columnspan=2, pady=10)
+        self.txt_result.grid(row=9, column=0, columnspan=2, pady=10)
         self.txt_result.tag_configure('color_blue', foreground='blue')
         self.txt_result.tag_configure('color_red', foreground='red')
 
         self.total = 0
         self.vehicle = 1
+        self.month = 1
 
     def toll_cost(self):
         """Calculate total cost according to tolls selected"""
@@ -180,6 +227,10 @@ class MainApplication(Frame):
         self.vehicle = self.selected_vehicle_type.get()
         self.toll_cost()
 
+    def month_selected(self):
+        """Update total cost according to vehicle type selected"""
+        self.month = self.selected_month.get() + 1
+
     def check_inputs(self):
         """Check for valid input in Tk widgets"""
         validation = True
@@ -192,17 +243,15 @@ class MainApplication(Frame):
                 'Please select Tolls (Frontal and/or Ramp)\n', 'color_red')
             validation = False
 
-        if self.ent_monthly_passes.get() == '':
-            self.txt_result.insert(
-                END, 'Please specify the monthly passes\n', 'color_red')
-            validation = False
-
         return validation
 
     def calculate(self):
         """Calculate the monthly tolls cost"""
         if self.check_inputs():
-            passes = int(self.ent_monthly_passes.get())
+            if (self.ent_monthly_passes.get() != ''):
+                passes = int(self.ent_monthly_passes.get())
+            else:
+                passes = workdays.getWorkingDays(self.month) * 2
             day_cost = self.total
             total_cost = 0
 
