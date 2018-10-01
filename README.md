@@ -12,8 +12,8 @@ Calculate Tolls on Olympia Odos when using the O-pass.
 
 To install all prerequisites please run the following command
 
-```pip install --user ttkthemes Pillow numpy```
+```pip install --user opass```
 
 ## Run
 
-`python opass.py`
+`opass`

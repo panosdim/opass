@@ -17,11 +17,12 @@ In order to run the application use:
 """
 import json
 import os
-from tkinter import (Frame, Text, IntVar, Tk, PhotoImage,
-                     END, DISABLED, NORMAL)
+from tkinter import (Frame, Text, IntVar, Tk, END, DISABLED, NORMAL)
 from tkinter import ttk
 from ttkthemes import ThemedStyle
-import workdays
+import PIL.Image
+import PIL.ImageTk
+import opass.workdays
 
 
 def validate(action, value_if_allowed, text):
@@ -251,7 +252,7 @@ class MainApplication(Frame):
             if (self.ent_monthly_passes.get() != ''):
                 passes = int(self.ent_monthly_passes.get())
             else:
-                passes = workdays.getWorkingDays(self.month) * 2
+                passes = opass.workdays.getWorkingDays(self.month) * 2
             day_cost = self.total
             total_cost = 0
 
@@ -364,14 +365,19 @@ class MainApplication(Frame):
             self.txt_result.configure(state=DISABLED)
 
 
-if __name__ == "__main__":
+def main():
     ABS_PATH = os.path.dirname(os.path.realpath(__file__))
     ROOT = Tk()
     STYLE = ThemedStyle(ROOT)
     STYLE.set_theme("arc")
     ROOT.resizable(False, False)
     ROOT.update()
-    IMG = PhotoImage(file=ABS_PATH + '/opass.gif')
+    im = PIL.Image.open(ABS_PATH + '/toll.png')
+    IMG = PIL.ImageTk.PhotoImage(im)
     ROOT.call('wm', 'iconphoto', ROOT._w, IMG)  # pylint: disable=W0212
     MainApplication(ROOT)
     ROOT.mainloop()
+
+
+if __name__ == "__main__":
+    main()
