@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="opass",
-    version="1.0.5",
+    version="1.0.6",
     author="Panagiotis Dimopoulos",
     author_email="panosdim@gmail.com",
     description="Calculate toll costs in Olympia Odos",
